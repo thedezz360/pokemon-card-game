@@ -1,0 +1,37 @@
+.container{
+	margin-inline: auto;
+	padding: 1rem;
+}
+
+
+/* Board */
+
+.board{
+	display: flex;
+	flex-flow: row wrap;
+	gap: 2rem;
+	margin-top: 2rem;
+	justify-content: center;
+}
+
+/* Card */
+.card{
+	width: 200px;
+	height: 278px;
+	border: 1px solid black;
+}
+
+.card-front > img {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+}
+
+.card-back > img{
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	
+}
