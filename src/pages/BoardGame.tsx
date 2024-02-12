@@ -93,10 +93,10 @@ export default function BoardGame() {
 				<button>Ok</button>
 			</form>
 			<div className="board">
-				{pokemons.map(pokemon => {
+				{pokemons.map((pokemon, index) => {
 					return (
 			
-						<Card key={pokemon.id} pokemon={pokemon} />
+						<Card key={index} pokemon={pokemon} />
 					);
 				})}
 
