@@ -18,18 +18,8 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-		"strictNullChecks": true,
-
-		/* Alias */
-		"baseUrl": ".",
-		"paths": {
-			"@/*":["src/*"],
-			"@pages/*":["src/pages/*"],
-			"@img":["src/assets/img/*"]
-		}
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }],
-	
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

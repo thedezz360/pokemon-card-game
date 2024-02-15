@@ -1,3 +1,11 @@
+export type PokemonMin ={
+	id: number,
+	img?: string,
+	name: string,
+	matched: boolean,
+	index?: number
+}
+
 export type Pokemon = {
     abilities:                Ability[];
     base_experience:          number;
@@ -18,6 +26,7 @@ export type Pokemon = {
     stats:                    Stat[];
     types:                    Type[];
     weight:                   number;
+		
 }
 
 export type Ability = {
