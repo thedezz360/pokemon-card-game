@@ -35,7 +35,7 @@ export default function CardPokemon({
 					<p>{pokemon.name}</p>
 				</div>
 				<img
-					src="/img/pokemon_card_backside.webp"
+					src="src/assets/img/pokemon_card_backside.webp"
 					alt="card back"
 					className='back'
 					onClick={handleClick}
