@@ -56,23 +56,29 @@ function App() {
 	 */
 	// shuffle cards
 	const shuffleCards = (data: Pokemon[]) => {
-		
-		const dataMin: PokemonMin[] = data.map((item)=>{
+
+		const dataMin: PokemonMin[] = data.map((item) => {
 			return {
 				id: item.id,
 				img: item.sprites.other?.["official-artwork"].front_default,
 				name: item.name,
 				matched: false,
-				
+
 			};
 		});
-		
+
+		const shuffleArray = (array: PokemonMin[]) => {
+			for (let i = array.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[array[i], array[j]] = [array[j], array[i]];
+			}
+		};
+
 		// duplicate cards
 		const shuffleCards = [...dataMin, ...dataMin]
-			// sort randomly pokemons
-			.sort(() => Math.random() - 0.5)
-			.map((pokemon, index) => ({...pokemon,index:index }));
-			
+			.map((pokemon, index) => ({ ...pokemon, index: index }));
+
+		shuffleArray(shuffleCards);
 		// set pokemons state
 		setPokemons(shuffleCards);
 		// set choices to null
@@ -125,16 +131,16 @@ function App() {
 	 * @param card data pokemon
 	 */
 	const handleChoice = (card: PokemonMin) => {
-		if(choiceOne){
-			if(choiceOne === card){
+		if (choiceOne) {
+			if (choiceOne === card) {
 				setChoiceTwo(null);
-			}else{
+			} else {
 				setChoiceTwo(card);
 			}
-		}else{
+		} else {
 			setChoiceOne(card);
 		}
-		
+
 		// choiceOne ?
 		// 	choiceOne === card ? 
 		// 		setChoiceTwo(null) : 
@@ -156,38 +162,38 @@ function App() {
 	 * compare 2 selected pokemons
 	 */
 	useEffect(() => {
-		
+
 		// if choiceOne and choiceTwo have a value
 		if (choiceOne && choiceTwo) {
 			//disabled
 			setDisabled(true);
 			// if there are equal
 			if (choiceOne.id === choiceTwo.id) {
-				
+
 				// update the state
 				setPokemons(prevPokemons => {
-					if(!prevPokemons){
+					if (!prevPokemons) {
 						return null;
-					}else{
+					} else {
 						return prevPokemons.map(pokemon => {
-							if(pokemon.id === choiceOne.id){
+							if (pokemon.id === choiceOne.id) {
 								// update propertie matched to true
-								return {...pokemon, matched:true};
-							}else{
+								return { ...pokemon, matched: true };
+							} else {
 								return pokemon;
 							}
 						});
 					}
 				});
 
-				
+
 			} else {
 				console.log("don't matched");
 			}
 
 			setTimeout(() => {
 				resetTurn();
-				
+
 			}, 1500);
 		}
 	}, [choiceOne, choiceTwo]);
@@ -219,7 +225,7 @@ function App() {
 								pokemon={pokemon}
 								handleChoice={handleChoice}
 								flipped={
-									pokemon === choiceOne || 
+									pokemon === choiceOne ||
 									pokemon === choiceTwo ||
 									pokemon.matched
 								}
