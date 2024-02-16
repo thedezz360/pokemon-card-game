@@ -6,7 +6,7 @@ import "./App.css";
 import CardPokemon from "./components/cardPokemon/CardPokemon";
 import Loading from "./components/loading/Loading";
 
-function App() {
+function App () {
 	const url = "https://pokeapi.co/api/v2/pokemon";
 
 	// array to store pokemons data
@@ -216,13 +216,13 @@ function App() {
 	/**
 	 * to check if all cards are matched
 	 */
-	useEffect(()=>{
+	useEffect(() => {
 
-		if(pokemons === null) return;
+		if (pokemons === null) return;
 		// check if all pokemons are matched and setGameEnd
 		setGameEnd(pokemons.every(pokemon => pokemon.matched));
 
-	},[pokemons]);
+	}, [pokemons]);
 
 	return (
 		<div className='app'>
@@ -239,12 +239,13 @@ function App() {
 
 			<h3>Turns: {turns}</h3>
 			
+			{
+				loading
+					? <Loading />
 
-			<div className='card-container'>
-				{
-					loading 
-						? <Loading />
-						: pokemons && 
+					: pokemons &&
+					<div className='card-container'>
+						{
 							pokemons.map((pokemon, index) => {
 								return (
 									<CardPokemon
@@ -253,15 +254,20 @@ function App() {
 										handleChoice={handleChoice}
 										flipped={
 											pokemon === choiceOne ||
-									pokemon === choiceTwo ||
-									pokemon.matched
+											pokemon === choiceTwo ||
+											pokemon.matched
 										}
 										disabled={disabled}
 									/>
 								);
 							})
-				}
-			</div>
+						}
+					</div>
+			}
+
+			{gameEnd && 
+				<h1> Fin del juego</h1>}
+
 
 		</div>
 	);
