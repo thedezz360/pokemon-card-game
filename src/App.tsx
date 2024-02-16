@@ -3,21 +3,25 @@ import { Pokemon, PokemonMin } from "./types/Pokemon";
 import { generateRandomNum } from "./utils/generateRandom";
 
 import "./App.css";
-import CardPokemon from "./components/CardPokemon";
+import CardPokemon from "./components/cardPokemon/CardPokemon";
+import Loading from "./components/loading/Loading";
 
 function App() {
 	const url = "https://pokeapi.co/api/v2/pokemon";
 
 	// array to store pokemons data
-	const [pokemons, setPokemons] = useState<PokemonMin[] | null>([]);
+	const [pokemons, setPokemons] = useState<PokemonMin[] | null>(null);
 	//game turns
 	const [turns, setTurns] = useState(0);
 	// states to store the cards choices
 	const [choiceOne, setChoiceOne] = useState<PokemonMin | null>(null);
 	const [choiceTwo, setChoiceTwo] = useState<PokemonMin | null>(null);
-	//
+	// to disabled clicked card 
 	const [disabled, setDisabled] = useState(false);
-
+	// to know when the game is finished
+	const [gameEnd, setGameEnd] = useState(false);
+	// state to loading
+	const [loading, setLoading] = useState(false);
 	/**
 	 * fetch, to get data from pokeapi
 	 * @param pkmsCount number of pokemons thats we want
@@ -67,6 +71,10 @@ function App() {
 			};
 		});
 
+		/**
+		 * sort randomly element 
+		 * @param array data to sort randomly
+		 */
 		const shuffleArray = (array: PokemonMin[]) => {
 			for (let i = array.length - 1; i > 0; i--) {
 				const j = Math.floor(Math.random() * (i + 1));
@@ -78,12 +86,14 @@ function App() {
 		const shuffleCards = [...dataMin, ...dataMin]
 			.map((pokemon, index) => ({ ...pokemon, index: index }));
 
+		// sort randomly
 		shuffleArray(shuffleCards);
 		// set pokemons state
 		setPokemons(shuffleCards);
 		// set choices to null
 		setChoiceOne(null);
 		setChoiceTwo(null);
+		// resets turns
 		setTurns(0);
 	};
 
@@ -95,6 +105,13 @@ function App() {
 	 */
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+
+		// reset pokemons data
+		setPokemons(null);
+
+		// set loading
+		setLoading(true);
+
 		const form = document.getElementById("pkmsCountForm") as HTMLFormElement;
 
 		const formData = new FormData(form);
@@ -119,6 +136,8 @@ function App() {
 						if (data !== undefined) {
 							// shuffle cards
 							shuffleCards(data);
+							// set loading false
+							setLoading(false);
 						}
 					})
 					.catch(e => { console.error(e); });
@@ -185,10 +204,6 @@ function App() {
 						});
 					}
 				});
-
-
-			} else {
-				console.log("don't matched");
 			}
 
 			setTimeout(() => {
@@ -198,8 +213,16 @@ function App() {
 		}
 	}, [choiceOne, choiceTwo]);
 
-	// start a new game automatically
+	/**
+	 * to check if all cards are matched
+	 */
+	useEffect(()=>{
 
+		if(pokemons === null) return;
+		// check if all pokemons are matched and setGameEnd
+		setGameEnd(pokemons.every(pokemon => pokemon.matched));
+
+	},[pokemons]);
 
 	return (
 		<div className='app'>
@@ -215,24 +238,28 @@ function App() {
 			</form>
 
 			<h3>Turns: {turns}</h3>
+			
 
 			<div className='card-container'>
 				{
-					pokemons && pokemons.map((pokemon, index) => {
-						return (
-							<CardPokemon
-								key={index}
-								pokemon={pokemon}
-								handleChoice={handleChoice}
-								flipped={
-									pokemon === choiceOne ||
+					loading 
+						? <Loading />
+						: pokemons && 
+							pokemons.map((pokemon, index) => {
+								return (
+									<CardPokemon
+										key={index}
+										pokemon={pokemon}
+										handleChoice={handleChoice}
+										flipped={
+											pokemon === choiceOne ||
 									pokemon === choiceTwo ||
 									pokemon.matched
-								}
-								disabled={disabled}
-							/>
-						);
-					})
+										}
+										disabled={disabled}
+									/>
+								);
+							})
 				}
 			</div>
 

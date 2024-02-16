@@ -1,4 +1,4 @@
-import { PokemonMin } from "../types/Pokemon";
+import { PokemonMin } from "../../types/Pokemon";
 import "./CardPokemon.css";
 
 type props = {
@@ -22,12 +22,15 @@ export default function CardPokemon({
 		}
 	};
 
+	console.log(pokemon.matched);
+
 	return (
 		<div
 			className='card'
 		>
+			
 			<div className={flipped ? "flipped card-content" : "card-content"}>
-				<div className='front'>
+				<div className={pokemon.matched ? "flash front" : "front"}>
 					<img
 						src={pokemon.img}
 						alt={pokemon.name + " img"}
