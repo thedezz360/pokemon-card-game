@@ -5,8 +5,9 @@ import { generateRandomNum } from "./utils/generateRandom";
 import "./App.css";
 import CardPokemon from "./components/cardPokemon/CardPokemon";
 import Loading from "./components/loading/Loading";
+import Settings from "./components/settings/Settings";
 
-function App () {
+function App() {
 	const url = "https://pokeapi.co/api/v2/pokemon";
 
 	// array to store pokemons data
@@ -22,6 +23,9 @@ function App () {
 	const [gameEnd, setGameEnd] = useState(false);
 	// state to loading
 	const [loading, setLoading] = useState(false);
+	// state to know how many pokemons we want
+	const [pkmCount, setPkmCount] = useState(3);
+
 	/**
 	 * fetch, to get data from pokeapi
 	 * @param pkmsCount number of pokemons thats we want
@@ -31,7 +35,7 @@ function App () {
 		try {
 			let pokemonData: Pokemon[] = [];
 			// function to generate as many random numbers as specified
-			const randomNums = generateRandomNum(1, 500, pkmsCount);
+			const randomNums = generateRandomNum(1, 1025, pkmsCount);
 
 			for (let i = 0; i < randomNums.length; i++) {
 				const response = await fetch(`${url}/${randomNums[i]}`);
@@ -103,52 +107,31 @@ function App () {
 	 * call shuffleCard to duplicate and sort randomly 
 	 * @param e event of click
 	 */
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-
+	const newGame = () => {
 		// reset pokemons data
 		setPokemons(null);
 
 		// set loading
 		setLoading(true);
 
-		const form = document.getElementById("pkmsCountForm") as HTMLFormElement;
-
-		const formData = new FormData(form);
-
-		//get the value of formData
-		const data = formData.get("pkmsCount");
-
-		if (!data) {
-			console.error("No se encontro la entrada en el formData");
-		} else {
-			// convert value to number
-			const n = Number(data);
-			// if is not at number
-			if (isNaN(n)) {
-				console.error("No se pudo convertir el valor númerico");
-			} else {
-
-				// call fetch to get pokemons
-				fetchData(n)
-					.then((data) => {
-						// if fetch ok
-						if (data !== undefined) {
-							// shuffle cards
-							shuffleCards(data);
-							// set loading false
-							setLoading(false);
-						}
-					})
-					.catch(e => { console.error(e); });
-			}
-		}
+		// call fetch to get pokemons
+		fetchData(pkmCount)
+			.then((data) => {
+				// if fetch ok
+				if (data !== undefined) {
+					// shuffle cards
+					shuffleCards(data);
+					// set loading false
+					setLoading(false);
+				}
+			})
+			.catch(e => { console.error(e); });
 	};
 
 	/**
-	 * get the cards when click over there 
-	 * @param card data pokemon
-	 */
+		 * get the cards when click over there 
+		 * @param card data pokemon
+		 */
 	const handleChoice = (card: PokemonMin) => {
 		if (choiceOne) {
 			if (choiceOne === card) {
@@ -168,8 +151,8 @@ function App () {
 	};
 
 	/**
-	 * reset chices and add one turn
-	 */
+		 * reset chices and add one turn
+		 */
 	const resetTurn = () => {
 		setChoiceOne(null);
 		setChoiceTwo(null);
@@ -178,8 +161,8 @@ function App () {
 	};
 
 	/**
-	 * compare 2 selected pokemons
-	 */
+		 * compare 2 selected pokemons
+		 */
 	useEffect(() => {
 
 		// if choiceOne and choiceTwo have a value
@@ -214,8 +197,8 @@ function App () {
 	}, [choiceOne, choiceTwo]);
 
 	/**
-	 * to check if all cards are matched
-	 */
+		 * to check if all cards are matched
+		 */
 	useEffect(() => {
 
 		if (pokemons === null) return;
@@ -228,45 +211,43 @@ function App () {
 		<div className='app'>
 			<h1>Pokemon Match</h1>
 
-
-			<form id="pkmsCountForm" onSubmit={handleSubmit} >
-				<div className='input-element'>
-					<label htmlFor="pkmsCount">Seleccione la cantidad de parejas:</label>
-					<input type="number" name="pkmsCount" min="3" max="15" />
-				</div>
-				<button>New Game</button>
-			</form>
-
 			<h3>Turns: {turns}</h3>
-			
+			<button onClick={newGame}>New Game</button>
+
 			{
+				// if loading set true show loading, if set false show pokemons
 				loading
 					? <Loading />
 
+					// if don't have pokemons , don't show nothing
 					: pokemons &&
-					<div className='card-container'>
-						{
-							pokemons.map((pokemon, index) => {
-								return (
-									<CardPokemon
-										key={index}
-										pokemon={pokemon}
-										handleChoice={handleChoice}
-										flipped={
-											pokemon === choiceOne ||
-											pokemon === choiceTwo ||
-											pokemon.matched
-										}
-										disabled={disabled}
-									/>
-								);
-							})
-						}
-					</div>
+						<div className='card-container'>
+							{
+								pokemons.map((pokemon, index) => {
+									return (
+										<CardPokemon
+											key={index}
+											pokemon={pokemon}
+											handleChoice={handleChoice}
+											flipped={
+												pokemon === choiceOne ||
+												pokemon === choiceTwo ||
+												pokemon.matched
+											}
+											disabled={disabled}
+										/>
+									);
+								})
+							}
+						</div>
 			}
 
-			{gameEnd && 
-				<h1> Fin del juego</h1>}
+			{
+				gameEnd &&
+					<h1> Fin del juego</h1>
+			}
+
+			<Settings setPkmCount={setPkmCount} pkmCount={pkmCount} />
 
 
 		</div>

@@ -1,0 +1,60 @@
+.settings{
+	position: absolute;
+	background-color: yellowgreen;
+}
+
+.search-container{
+	position: relative;
+	width: min-content;
+  margin-inline: auto;
+}
+
+#searchInput{
+	padding: 10px;
+	width: 300px;
+}
+
+#suggestionList{
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	overflow-y: hidden;
+	max-height: 399px;
+
+  border: 1px solid #ddd;
+  border-top: none;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+ 
+	& li{
+		padding: 10px;
+		cursor: pointer;
+		border-bottom: 1px solid #ddd;
+	}
+
+	& li:last-child{
+		border-bottom: none;
+	}
+}
+
+.input-element{
+	display: flex;
+}
+
+.tags-container{
+	display: flex;
+	flex-wrap: wrap;
+	padding: 1rem;
+	gap: .5rem;
+}
+
+.tag{
+	background-color: #a8a8a8 ;
+	padding: 2px 10px;
+	border-radius: 10px;
+	display: flex;
+	justify-content: center;
+}
