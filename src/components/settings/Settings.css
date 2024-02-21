@@ -103,6 +103,7 @@ input{
 	justify-content: space-between;
 	align-items: center;
 	column-gap: .5rem;
+	font-size: 1rem;
 }
 
 .tag-close{
