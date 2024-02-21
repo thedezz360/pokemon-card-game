@@ -6,10 +6,7 @@
 	width: 450px;
 	left: -430px;
 	height: 200px;
-	transition: height ease-in 1s, left ease-in 1s ;
-
-	
-	overflow: hidden;
+	transition: height ease-in .5s .5s, left ease-in .5s ;
 }
 
 .settings-container{
@@ -31,8 +28,8 @@
 
 .show-settings{
 	left: 0;
-	height: 485px;
-	overflow: initial;
+	height: 80%;
+	transition: height ease-in .5s, left ease-in .5s .5s;
 }
 
 input{
