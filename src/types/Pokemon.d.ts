@@ -1,3 +1,12 @@
+
+export type PokemonName = {
+	name: string,
+	id: number
+}
+export type PokemonNames = {
+	pokemons: PokemonName[]
+}
+
 export type PokemonMin ={
 	id: number,
 	img?: string,

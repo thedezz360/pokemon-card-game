@@ -12,7 +12,10 @@ const fetchAllPokemons = async () => {
 
 		const pokemon = await response.json() as Pokemon;
 
-		pokemonsNames.push(`{"name":"${pokemon.name}"}`);
+		pokemonsNames.push(`{
+				"name":"${pokemon.name}",
+				"id":${pokemon.id}
+			}`);
 	}
 		
 	return pokemonsNames;

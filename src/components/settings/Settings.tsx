@@ -1,28 +1,27 @@
 import { ChangeEvent, useState } from "react";
 import pokemonsNames from "../../pokemonsNames.json";
 import "./Settings.css";
-// import { Pokemon } from "../../types/Pokemon";
+import { PokemonName, PokemonNames } from "../../types/Pokemon";
 
-type PokemonName = {
-	name: string
-}
-type PokemonNames = {
-	pokemons: PokemonName[]
-}
+
 
 type Props = {
 	setPkmCount: (pkmCount: number) => void,
-	pkmCount: number
+	pkmCount: number,
+	setCardsManually : (pokemonNames: PokemonName[])=>void,
+	manually: boolean,
+	setManually:(manually:boolean)=>void
 }
 
 const dataPokemonNames: PokemonNames = pokemonsNames;
 
-export default function Settings({ setPkmCount, pkmCount }: Props) {
+export default function Settings({ setPkmCount, pkmCount, setCardsManually, manually, setManually }: Props) {
 
-	const [manually, setManually] = useState(false);
+	
 	const [searchValue, setSearchValue] = useState("");
 	const [suggestions, setSuggestions] = useState<PokemonName[]>([]);
-	const [tags, setTags] = useState<string[]>([]);
+	const [tags, setTags] = useState<PokemonName[]>([]);
+	const [showSettings, setShowSettings] = useState(false);
 
 
 	/**
@@ -102,7 +101,7 @@ export default function Settings({ setPkmCount, pkmCount }: Props) {
 		}
 
 		// check to not repeat tags
-		const included = tags.includes(searchValue.toLowerCase());
+		const included = tags.some(tag => tag.name === searchValue.toLowerCase());
 		if(included){
 			console.log("the pokemon was included");
 			return false;
@@ -132,100 +131,147 @@ export default function Settings({ setPkmCount, pkmCount }: Props) {
 
 		// add valueSearch to tags state
 		setTags(prev => {
-			return [...prev, searchValue];
+
+			const pokemonTag = dataPokemonNames.pokemons.find(pokemon => pokemon.name === searchValue);
+
+			if(pokemonTag === undefined) return[];
+
+			return [...prev, pokemonTag];
 		});
 
+		// reset valueSearch
+		setSearchValue("");
+
+	};
+
+
+	const handleCloseClick = (tag:PokemonName)=>{
+		setTags(prev => {
+			return prev.filter(prevTag => prevTag.name !== tag.name );
+		});
+
+	};
+
+	const handleConfirmClick =(e : React.MouseEvent<HTMLButtonElement>)=>{
+		e.preventDefault();
+		if(pkmCount !== tags.length){
+			console.log(`You need to select ${pkmCount} cards`);
+			return;
+		}
+		
+		setCardsManually(tags);
 	};
 
 
 
 
 	return (
-		<div className="settings">
+		<div className={showSettings ? "settings show-settings" : "settings"}>
+
+			<span 
+				className="show-settings-button" 
+				onClick={()=>{setShowSettings(prev => !prev);}}
+			> 
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" width="20px">
+					<path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+				</svg>
+
+			</span>
 			<div className="settings-container">
 
 				<h1>Settings</h1>
 				<form id="pkmsCountForm">
 					<div className='input-element'>
 						<label htmlFor="pkmsCount">Select number of pairs:</label>
-						<input type="number" name="pkmsCount" min="3" max="15" onChange={handleChange} value={pkmCount} />
+						<input className="pkmCount" type="number" name="pkmsCount" min="3" max="15" onChange={handleChange} value={pkmCount} />
 					</div>
 
 					<div className="select-cards">
 						<h3>Select cards</h3>
 
-						<label htmlFor="selectCardsRandomly">
-							<input
-								type="radio"
-								name="selectCards"
-								id="selectCardsRandomly"
-								defaultChecked
-								onChange={handleChange}
-							/>
+						<div className="mb-1">
+							<label htmlFor="selectCardsRandomly" className="mr-1">
+								<input
+									type="radio"
+									name="selectCards"
+									id="selectCardsRandomly"
+									defaultChecked
+									onChange={handleChange}
+								/>
 							Randomly
-						</label>
+							</label>
 
 
-						<label htmlFor="selectCardsManually">
-							<input
-								type="radio"
-								name="selectCards"
-								id="selectCardsManually"
-								onChange={handleChange}
-							/>
+							<label htmlFor="selectCardsManually">
+								<input
+									type="radio"
+									name="selectCards"
+									id="selectCardsManually"
+									onChange={handleChange}
+								/>
 							Manually
-						</label>
+							</label>
+						</div>
 
 						{
 							manually &&
 
-							<div className="search-container">
+							<div className="min-content">
 								<div className="input-element">
-									<input
-										type="text"
-										id="searchInput"
-										placeholder="Search.."
-										autoComplete="off"
-										name="searchPkm"
-										onInput={handleChange}
-										value={searchValue}
-									/>
+									<div className="search-container">
+										<input
+											type="text"
+											id="searchInput"
+											placeholder="Search.."
+											autoComplete="off"
+											name="searchPkm"
+											onInput={handleChange}
+											value={searchValue}
+										/>
+										<ul id="suggestionList">
+											{
+												suggestions.map((suggestion, index) => (
+													<li
+														key={index}
+														onClick={() => { handleSuggestionClick(suggestion.name); }}
+													>
+														{suggestion.name}
+													</li>
+												))
+											}
+										</ul>
+									</div>
 									<button onClick={handleAddTagClick}>add</button>
 								</div>
+								
 								
 
 
 								<div className="tags-container">
 									{
 
-										tags.map((tag, index) => (
-											<div key={index} className="tag"> 
-												<span>{tag}</span>
-												<span>
+										tags.map((tag) => (
+											<div key={tag.id} className="tag" data-id={tag.id}> 
+												<div>
+													{tag.name}
+												</div>	
+												
+												<span className="tag-close" onClick={()=>{handleCloseClick(tag);}}>
 													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20px">
 														<path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
 													</svg>
 
 												</span>
+
+												
 											</div>
 										))
 									}
 								</div>
 
-								<ul id="suggestionList">
-									{
-										suggestions.map((suggestion, index) => (
-											<li
-												key={index}
-												onClick={() => { handleSuggestionClick(suggestion.name); }}
-											>
-												{suggestion.name}
-											</li>
-										))
-									}
-								</ul>
-
+								<button onClick={handleConfirmClick}>Confirm cards</button>
 							</div>
+							
 						}
 
 					</div>

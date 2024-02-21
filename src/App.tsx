@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Pokemon, PokemonMin } from "./types/Pokemon";
+import { Pokemon, PokemonMin, PokemonName } from "./types/Pokemon";
 import { generateRandomNum } from "./utils/generateRandom";
 
 import "./App.css";
 import CardPokemon from "./components/cardPokemon/CardPokemon";
 import Loading from "./components/loading/Loading";
 import Settings from "./components/settings/Settings";
+
 
 function App() {
 	const url = "https://pokeapi.co/api/v2/pokemon";
@@ -25,13 +26,16 @@ function App() {
 	const [loading, setLoading] = useState(false);
 	// state to know how many pokemons we want
 	const [pkmCount, setPkmCount] = useState(3);
-
+	// state to know selected card manually
+	const [cardsManually, setCardsManually] = useState<PokemonName[]>([]);
+	// to know if fetch is randomly or manually
+	const [manually, setManually] = useState(false);
 	/**
-	 * fetch, to get data from pokeapi
+	 * fetch, to get randomly pokemon from pokeapi
 	 * @param pkmsCount number of pokemons thats we want
 	 * @returns Array with the number of Pokemon that have been specified
 	 */
-	const fetchData = async (pkmsCount: number) => {
+	const fetchPokemonRandomly = async (pkmsCount: number) => {
 		try {
 			let pokemonData: Pokemon[] = [];
 			// function to generate as many random numbers as specified
@@ -39,6 +43,39 @@ function App() {
 
 			for (let i = 0; i < randomNums.length; i++) {
 				const response = await fetch(`${url}/${randomNums[i]}`);
+
+				if (!response.ok) {
+					throw new Error("No se pudo obtener la información");
+				}
+
+				const data = await response.json() as Pokemon;
+
+				pokemonData = [...pokemonData, data];
+			}
+
+			// return pokemons
+			return pokemonData;
+
+
+		} catch (error) {
+			console.error("Error al obtener datos:", error);
+		}
+	};
+
+	/**
+	 * fetch, to get manually pokemon from pokeapi
+	 * @param pkmsCount number of pokemons thats we want
+	 * @returns Array with the number of Pokemon that have been specified
+	 */
+	const fetchPokemonManually = async () => {
+		try {
+			let pokemonData: Pokemon[] = [];
+			
+
+			for (let i = 0; i < cardsManually.length; i++) {
+				const cardSelected = cardsManually[i];
+
+				const response = await fetch(`${url}/${cardSelected.id}`);
 
 				if (!response.ok) {
 					throw new Error("No se pudo obtener la información");
@@ -114,18 +151,35 @@ function App() {
 		// set loading
 		setLoading(true);
 
-		// call fetch to get pokemons
-		fetchData(pkmCount)
-			.then((data) => {
+		// if manually
+		if(manually){
+			fetchPokemonManually()
+				.then(data =>{
+					//if fetch ok
+					if(data !== undefined){
+						// shuffle cards
+						shuffleCards(data);
+						// set loading false
+						setLoading(false);
+					}
+				})
+				.catch(e=>{console.error("Error:",e);});
+		}else{
+
+			// call fetch to get pokemons
+			fetchPokemonRandomly(pkmCount)
+				.then((data) => {
 				// if fetch ok
-				if (data !== undefined) {
+					if (data !== undefined) {
 					// shuffle cards
-					shuffleCards(data);
-					// set loading false
-					setLoading(false);
-				}
-			})
-			.catch(e => { console.error(e); });
+						shuffleCards(data);
+						// set loading false
+						setLoading(false);
+					}
+				})
+				.catch(e => { console.error(e); });
+		}
+
 	};
 
 	/**
@@ -247,7 +301,14 @@ function App() {
 					<h1> Fin del juego</h1>
 			}
 
-			<Settings setPkmCount={setPkmCount} pkmCount={pkmCount} />
+
+			<Settings 
+				setPkmCount={setPkmCount} 
+				pkmCount={pkmCount} 
+				setCardsManually={setCardsManually}
+				manually={manually}
+				setManually={setManually}
+			/>
 
 
 		</div>

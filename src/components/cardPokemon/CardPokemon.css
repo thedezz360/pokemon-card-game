@@ -55,7 +55,6 @@
 	width: 25%;
 	transform: skewX(-30deg);
 	left: -130px;
-	border-radius: 50%;
 }
 
 .flipped .front::before{
