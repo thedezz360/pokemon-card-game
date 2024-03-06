@@ -2,22 +2,23 @@ import { ChangeEvent, useState } from "react";
 import pokemonsNames from "../../pokemonsNames.json";
 import "./Settings.css";
 import { PokemonName, PokemonNames } from "../../types/Pokemon";
+import Swal from "sweetalert2";
 
 
 
 type Props = {
 	setPkmCount: (pkmCount: number) => void,
 	pkmCount: number,
-	setCardsManually : (pokemonNames: PokemonName[])=>void,
+	setCardsManually: (pokemonNames: PokemonName[]) => void,
 	manually: boolean,
-	setManually:(manually:boolean)=>void
+	setManually: (manually: boolean) => void
 }
 
 const dataPokemonNames: PokemonNames = pokemonsNames;
 
 export default function Settings({ setPkmCount, pkmCount, setCardsManually, manually, setManually }: Props) {
 
-	
+
 	const [searchValue, setSearchValue] = useState("");
 	const [suggestions, setSuggestions] = useState<PokemonName[]>([]);
 	const [tags, setTags] = useState<PokemonName[]>([]);
@@ -85,33 +86,59 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 
 	/**
 	 * check if valueSearch is valid
+	 * no more pokemons that pkmCount
+	 * check if pokemon exist
+	 * check no repeat 
 	 * @returns boolean
 	 */
-	const checkValueSearch = () => {
+	const checkValueSearch = (dataPokemonNames: PokemonNames, searchValue: string, pkmCount: number) => {
+
+
+		if (searchValue === "") return false;
+
+		// no add more pokemons that pkmCount
+		if (tags.length >= pkmCount) {
+			console.log("don't can't add more pokemons");
+			Swal.fire({
+				title: "Error",
+				text: "No se pueden añadir más Pokemons",
+				icon: "error"
+			})
+				.catch(e => { console.error("Error: ", e); });
+			return false;
+		}
 
 		// check searchValue is a valid pokemon name
-		const some = dataPokemonNames.pokemons.some(pokemon => {
+		const some: boolean = dataPokemonNames.pokemons.some((pokemon: PokemonName) => {
 			return pokemon.name === searchValue.toLowerCase();
 		});
 
 		// if searchValue no valid
 		if (!some) {
+			Swal.fire({
+				title: "Error",
+				text: `El Pokemon ${searchValue} no se encuentra`,
+				icon: "error"
+			})
+				.catch(e => { console.error("Error: ", e); });
 			console.log("search value no valid");
 			return false;
 		}
 
 		// check to not repeat tags
 		const included = tags.some(tag => tag.name === searchValue.toLowerCase());
-		if(included){
+		if (included) {
+			Swal.fire({
+				title: "Error",
+				text: `El Pokemon ${searchValue} ya está seleccionado`,
+				icon: "error"
+			})
+				.catch(e => { console.error("Error: ", e); });
 			console.log("the pokemon was included");
 			return false;
 		}
 
-		// no add more pokemons that pkmCount
-		if(tags.length >= pkmCount){
-			console.log("don't can't add more pokemons");
-			return false;
-		}
+
 
 		// all good return true
 		return true;
@@ -125,8 +152,9 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 	const handleAddTagClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 
+
 		// check valueSearch
-		const check = checkValueSearch();
+		const check = checkValueSearch(dataPokemonNames, searchValue, pkmCount);
 		if (!check) return;
 
 		// add valueSearch to tags state
@@ -134,10 +162,13 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 
 			const pokemonTag = dataPokemonNames.pokemons.find(pokemon => pokemon.name === searchValue);
 
-			if(pokemonTag === undefined) return[];
+			if (pokemonTag === undefined) return [];
+			setCardsManually([...prev, pokemonTag]);
 
 			return [...prev, pokemonTag];
 		});
+
+
 
 		// reset valueSearch
 		setSearchValue("");
@@ -145,22 +176,24 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 	};
 
 
-	const handleCloseClick = (tag:PokemonName)=>{
+	const handleCloseClick = (tag: PokemonName) => {
 		setTags(prev => {
-			return prev.filter(prevTag => prevTag.name !== tag.name );
+			const pkmFiltered = prev.filter(prevTag => prevTag.name !== tag.name);
+			setCardsManually([...pkmFiltered]);
+			return pkmFiltered;
 		});
 
 	};
 
-	const handleConfirmClick =(e : React.MouseEvent<HTMLButtonElement>)=>{
-		e.preventDefault();
-		if(pkmCount !== tags.length){
-			console.log(`You need to select ${pkmCount} cards`);
-			return;
-		}
-		
-		setCardsManually(tags);
-	};
+	// const handleConfirmClick =(e : React.MouseEvent<HTMLButtonElement>)=>{
+	// 	e.preventDefault();
+	// 	if(pkmCount !== tags.length){
+	// 		console.log(`You need to select ${pkmCount} cards`);
+	// 		return;
+	// 	}
+
+
+	// };
 
 
 
@@ -168,13 +201,24 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 	return (
 		<div className={showSettings ? "settings show-settings" : "settings"}>
 
-			<span 
-				className="show-settings-button" 
-				onClick={()=>{setShowSettings(prev => !prev);}}
-			> 
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" width="20px">
-					<path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-				</svg>
+			<span
+				className="show-settings-button"
+				onClick={() => { setShowSettings(prev => !prev); }}
+			>	
+				{showSettings ? 
+					(<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+						<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+					</svg>)
+					: (
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" width="20px">
+							<path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+						</svg>
+					)
+				}
+				
+
+				
+
 
 			</span>
 			<div className="settings-container">
@@ -198,7 +242,7 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 									defaultChecked
 									onChange={handleChange}
 								/>
-							Randomly
+								Randomly
 							</label>
 
 
@@ -209,7 +253,7 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 									id="selectCardsManually"
 									onChange={handleChange}
 								/>
-							Manually
+								Manually
 							</label>
 						</div>
 
@@ -243,35 +287,35 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 									</div>
 									<button onClick={handleAddTagClick}>add</button>
 								</div>
-								
-								
+
+
 
 
 								<div className="tags-container">
 									{
 
 										tags.map((tag) => (
-											<div key={tag.id} className="tag" data-id={tag.id}> 
+											<div key={tag.id} className="tag" data-id={tag.id}>
 												<div>
 													{tag.name}
-												</div>	
-												
-												<span className="tag-close" onClick={()=>{handleCloseClick(tag);}}>
+												</div>
+
+												<span className="tag-close" onClick={() => { handleCloseClick(tag); }}>
 													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20px">
 														<path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
 													</svg>
 
 												</span>
 
-												
+
 											</div>
 										))
 									}
 								</div>
 
-								<button onClick={handleConfirmClick}>Confirm cards</button>
+
 							</div>
-							
+
 						}
 
 					</div>

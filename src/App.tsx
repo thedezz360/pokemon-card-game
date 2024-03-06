@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Pokemon, PokemonMin, PokemonName } from "./types/Pokemon";
 import { generateRandomNum } from "./utils/generateRandom";
+import usePlayer from "./hooks/usePlayer";
+import Swal from "sweetalert2";
 
 import "./App.css";
 import CardPokemon from "./components/cardPokemon/CardPokemon";
@@ -25,11 +27,27 @@ function App() {
 	// state to loading
 	const [loading, setLoading] = useState(false);
 	// state to know how many pokemons we want
-	const [pkmCount, setPkmCount] = useState(3);
+	const [pkmCount, setPkmCount] = useState<number>(3);
 	// state to know selected card manually
 	const [cardsManually, setCardsManually] = useState<PokemonName[]>([]);
 	// to know if fetch is randomly or manually
 	const [manually, setManually] = useState(false);
+	// to set the width of cards container
+	const [width, setWidth] = useState("");
+
+	const {
+		setPlayer1,
+		setPlayer2, 
+		player1, 
+		player2, 
+		player1Points,
+		player2Points,
+		setPlayer1Points, 
+		setPlayer2Points,
+	}  =usePlayer();
+	console.log({player1, player2});
+	
+	
 	/**
 	 * fetch, to get randomly pokemon from pokeapi
 	 * @param pkmsCount number of pokemons thats we want
@@ -64,16 +82,16 @@ function App() {
 
 	/**
 	 * fetch, to get manually pokemon from pokeapi
-	 * @param pkmsCount number of pokemons thats we want
+	 * @param cards array of cards that we will find
 	 * @returns Array with the number of Pokemon that have been specified
 	 */
-	const fetchPokemonManually = async () => {
+	const fetchPokemonManually = async (cards:PokemonName[]) => {
 		try {
 			let pokemonData: Pokemon[] = [];
 			
 
-			for (let i = 0; i < cardsManually.length; i++) {
-				const cardSelected = cardsManually[i];
+			for (let i = 0; i < cards.length; i++) {
+				const cardSelected = cards[i];
 
 				const response = await fetch(`${url}/${cardSelected.id}`);
 
@@ -139,21 +157,83 @@ function App() {
 	};
 
 	/**
+	 * set width of board
+	 * @param pkmNumber numbers of pkms
+	 * @returns 
+	 */
+	const setWidthClass = (pkmNumber: number)=>{
+		// set the width of board
+		if( pkmNumber === 3){
+			setWidth("width-3-cards");
+			return;
+		}
+
+		if (pkmNumber === 4){
+			setWidth("width-4-cards");
+			return;
+		}
+		if (pkmNumber === 5){
+			setWidth("width-5-cards");
+			return;
+		}
+		if (pkmNumber === 6){
+			setWidth("width-6-cards");
+			return;
+		}
+		if (pkmNumber === 7){
+			setWidth("width-7-cards");
+			return;
+		}
+		if (pkmNumber >= 8){
+			setWidth("width-8-cards");
+			return;
+		}
+	};
+
+	/**
 	 * Get the numbers of pokemons and set pkmsCount
 	 * call fetchData to get pokemons
 	 * call shuffleCard to duplicate and sort randomly 
 	 * @param e event of click
 	 */
 	const newGame = () => {
-		// reset pokemons data
-		setPokemons(null);
-
-		// set loading
-		setLoading(true);
-
+		
+		
+		
 		// if manually
 		if(manually){
-			fetchPokemonManually()
+			
+			// check how many tags are 
+			if(cardsManually.length !== pkmCount){
+				console.log("Debe seleccionar al menos " + pkmCount + " pokemons");
+
+				Swal.fire({
+					title: "Error!",
+					text: `Debe seleccionar al menos: ${pkmCount} pokemons`,
+					icon: "error"
+				})
+					.catch(e => {console.error("Error: " , e);});
+				return;
+			}
+
+			//set player1 to first
+			setPlayer1(true);
+			// set player2 to second
+			setPlayer2(false);
+			// reset players points
+			setPlayer1Points(0);
+			setPlayer2Points(0);
+			// set game end to false
+			setGameEnd(false);
+
+			// reset pokemons data
+			setPokemons(null);
+			// set loading
+			setLoading(true);
+			// set width 
+			setWidthClass(pkmCount);
+
+			fetchPokemonManually(cardsManually)
 				.then(data =>{
 					//if fetch ok
 					if(data !== undefined){
@@ -166,12 +246,29 @@ function App() {
 				.catch(e=>{console.error("Error:",e);});
 		}else{
 
+			//set player1 to first
+			setPlayer1(true);
+			// set player2 to second
+			setPlayer2(false);
+			// reset players points
+			setPlayer1Points(0);
+			setPlayer2Points(0);
+			// set game end to false
+			setGameEnd(false);
+
+			// reset pokemons data
+			setPokemons(null);
+			// set loading
+			setLoading(true);
+			// set width 
+			setWidthClass(pkmCount);
+			
 			// call fetch to get pokemons
 			fetchPokemonRandomly(pkmCount)
 				.then((data) => {
 				// if fetch ok
 					if (data !== undefined) {
-					// shuffle cards
+						// shuffle cards
 						shuffleCards(data);
 						// set loading false
 						setLoading(false);
@@ -205,7 +302,7 @@ function App() {
 	};
 
 	/**
-		 * reset chices and add one turn
+		 * reset choices and add one turn
 		 */
 	const resetTurn = () => {
 		setChoiceOne(null);
@@ -218,7 +315,7 @@ function App() {
 		 * compare 2 selected pokemons
 		 */
 	useEffect(() => {
-
+		
 		// if choiceOne and choiceTwo have a value
 		if (choiceOne && choiceTwo) {
 			//disabled
@@ -241,6 +338,18 @@ function App() {
 						});
 					}
 				});
+
+
+				if(player1) setPlayer1Points( prev => prev + 1);
+
+				if(player2) setPlayer2Points(prev => prev + 1);
+				console.log({player1Points, player2Points});
+
+			}else{
+				// change turn
+				console.log("cambiamos el turno");
+				setPlayer1(prev => !prev);
+				setPlayer2(prev => !prev);
 			}
 
 			setTimeout(() => {
@@ -248,7 +357,7 @@ function App() {
 
 			}, 1500);
 		}
-	}, [choiceOne, choiceTwo]);
+	}, [ choiceOne, choiceTwo, setPlayer1, setPlayer2]);
 
 	/**
 		 * to check if all cards are matched
@@ -260,6 +369,42 @@ function App() {
 		setGameEnd(pokemons.every(pokemon => pokemon.matched));
 
 	}, [pokemons]);
+
+	/**
+	 * to check if game is end
+	 */
+	useEffect(()=>{ 
+		
+		
+
+		const f =  ()=>{
+			console.log({player1Points, player2Points});
+			setTimeout (async() => {
+
+				const winner = player1Points > player2Points ?
+					"player1" 
+					: player2Points > player1Points ?
+						"player2"
+						: "empate";
+
+				await Swal.fire({
+					title:"Juego terminado",
+					text:`player1 points: ${player1Points}, player2 points: ${player2Points}
+						gana: ${winner}`,
+					icon:"success"
+				});
+			}, 1000);
+			
+		};
+
+		if(gameEnd){
+			console.log("first");
+			f();
+		}
+
+	},[gameEnd, player1Points, player2Points]);
+
+
 
 	return (
 		<div className='app'>
@@ -275,7 +420,7 @@ function App() {
 
 					// if don't have pokemons , don't show nothing
 					: pokemons &&
-						<div className='card-container'>
+						<div className={`card-container ${width}`}>
 							{
 								pokemons.map((pokemon, index) => {
 									return (
@@ -295,12 +440,6 @@ function App() {
 							}
 						</div>
 			}
-
-			{
-				gameEnd &&
-					<h1> Fin del juego</h1>
-			}
-
 
 			<Settings 
 				setPkmCount={setPkmCount} 

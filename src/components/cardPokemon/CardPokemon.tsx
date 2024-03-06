@@ -22,7 +22,7 @@ export default function CardPokemon({
 		}
 	};
 
-	console.log(pokemon.matched);
+	
 
 	return (
 		<div
