@@ -1,0 +1,30 @@
+.marcador{
+	display: grid;
+	grid-template-columns: auto auto auto;
+	align-items: center;
+	justify-content: space-around;
+	
+	
+}
+
+.marcador .player{
+	display: flex;
+	flex-direction: column;
+	animation: all 1s;
+	
+}
+
+.marcador .player-active{
+	animation: player-active 1s forwards .5s;
+	
+}
+
+@keyframes player-active {
+
+	to{
+		scale: 1.2;
+		color: rgba(255, 255, 0);
+	}
+}
+
+

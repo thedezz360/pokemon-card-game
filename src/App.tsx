@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { Pokemon, PokemonMin, PokemonName } from "./types/Pokemon";
 import { generateRandomNum } from "./utils/generateRandom";
-import usePlayer from "./hooks/usePlayer";
+
+import JSConfetti from "js-confetti";
 import Swal from "sweetalert2";
 
 import "./App.css";
 import CardPokemon from "./components/cardPokemon/CardPokemon";
 import Loading from "./components/loading/Loading";
 import Settings from "./components/settings/Settings";
+import Marcador from "./components/marcador/Marcador";
 
 
 function App() {
@@ -34,20 +36,21 @@ function App() {
 	const [manually, setManually] = useState(false);
 	// to set the width of cards container
 	const [width, setWidth] = useState("");
+	// player points
+	const [player1Points, setPlayer1Points] = useState(0);
+	const [player2Points, setPlayer2Points] = useState(0);
+	// to know player turn
+	const [player1, setPlayer1] = useState(false);
+	const [player2, setPlayer2] = useState(false);
+	// to know if are two players
+	const [twoPlayers, setTwoPlayers] = useState(false);
 
-	const {
-		setPlayer1,
-		setPlayer2, 
-		player1, 
-		player2, 
-		player1Points,
-		player2Points,
-		setPlayer1Points, 
-		setPlayer2Points,
-	}  =usePlayer();
-	console.log({player1, player2});
-	
-	
+	// create confetti instance
+	const jsConfetti = new JSConfetti();
+
+
+
+
 	/**
 	 * fetch, to get randomly pokemon from pokeapi
 	 * @param pkmsCount number of pokemons thats we want
@@ -85,10 +88,10 @@ function App() {
 	 * @param cards array of cards that we will find
 	 * @returns Array with the number of Pokemon that have been specified
 	 */
-	const fetchPokemonManually = async (cards:PokemonName[]) => {
+	const fetchPokemonManually = async (cards: PokemonName[]) => {
 		try {
 			let pokemonData: Pokemon[] = [];
-			
+
 
 			for (let i = 0; i < cards.length; i++) {
 				const cardSelected = cards[i];
@@ -161,30 +164,30 @@ function App() {
 	 * @param pkmNumber numbers of pkms
 	 * @returns 
 	 */
-	const setWidthClass = (pkmNumber: number)=>{
+	const setWidthClass = (pkmNumber: number) => {
 		// set the width of board
-		if( pkmNumber === 3){
+		if (pkmNumber === 3) {
 			setWidth("width-3-cards");
 			return;
 		}
 
-		if (pkmNumber === 4){
+		if (pkmNumber === 4) {
 			setWidth("width-4-cards");
 			return;
 		}
-		if (pkmNumber === 5){
+		if (pkmNumber === 5) {
 			setWidth("width-5-cards");
 			return;
 		}
-		if (pkmNumber === 6){
+		if (pkmNumber === 6) {
 			setWidth("width-6-cards");
 			return;
 		}
-		if (pkmNumber === 7){
+		if (pkmNumber === 7) {
 			setWidth("width-7-cards");
 			return;
 		}
-		if (pkmNumber >= 8){
+		if (pkmNumber >= 8) {
 			setWidth("width-8-cards");
 			return;
 		}
@@ -197,14 +200,14 @@ function App() {
 	 * @param e event of click
 	 */
 	const newGame = () => {
-		
-		
-		
+
+
+
 		// if manually
-		if(manually){
-			
+		if (manually) {
+
 			// check how many tags are 
-			if(cardsManually.length !== pkmCount){
+			if (cardsManually.length !== pkmCount) {
 				console.log("Debe seleccionar al menos " + pkmCount + " pokemons");
 
 				Swal.fire({
@@ -212,7 +215,7 @@ function App() {
 					text: `Debe seleccionar al menos: ${pkmCount} pokemons`,
 					icon: "error"
 				})
-					.catch(e => {console.error("Error: " , e);});
+					.catch(e => { console.error("Error: ", e); });
 				return;
 			}
 
@@ -234,17 +237,17 @@ function App() {
 			setWidthClass(pkmCount);
 
 			fetchPokemonManually(cardsManually)
-				.then(data =>{
+				.then(data => {
 					//if fetch ok
-					if(data !== undefined){
+					if (data !== undefined) {
 						// shuffle cards
 						shuffleCards(data);
 						// set loading false
 						setLoading(false);
 					}
 				})
-				.catch(e=>{console.error("Error:",e);});
-		}else{
+				.catch(e => { console.error("Error:", e); });
+		} else {
 
 			//set player1 to first
 			setPlayer1(true);
@@ -262,11 +265,11 @@ function App() {
 			setLoading(true);
 			// set width 
 			setWidthClass(pkmCount);
-			
+
 			// call fetch to get pokemons
 			fetchPokemonRandomly(pkmCount)
 				.then((data) => {
-				// if fetch ok
+					// if fetch ok
 					if (data !== undefined) {
 						// shuffle cards
 						shuffleCards(data);
@@ -312,12 +315,28 @@ function App() {
 	};
 
 	/**
+	 * add point
+	 */
+	const addPoint = () => {
+
+		if (player1) {
+			setPlayer1Points(prev => prev + 1);
+		} else {
+
+			setPlayer2Points(prev => prev + 1);
+		}
+
+	};
+
+	/**
 		 * compare 2 selected pokemons
 		 */
 	useEffect(() => {
-		
+		console.log("first");
+
 		// if choiceOne and choiceTwo have a value
 		if (choiceOne && choiceTwo) {
+			console.log("second");
 			//disabled
 			setDisabled(true);
 			// if there are equal
@@ -330,7 +349,7 @@ function App() {
 					} else {
 						return prevPokemons.map(pokemon => {
 							if (pokemon.id === choiceOne.id) {
-								// update propertie matched to true
+								// update propertied matched to true
 								return { ...pokemon, matched: true };
 							} else {
 								return pokemon;
@@ -339,13 +358,10 @@ function App() {
 					}
 				});
 
+				// add point to player in turn
+				addPoint();
 
-				if(player1) setPlayer1Points( prev => prev + 1);
-
-				if(player2) setPlayer2Points(prev => prev + 1);
-				console.log({player1Points, player2Points});
-
-			}else{
+			} else {
 				// change turn
 				console.log("cambiamos el turno");
 				setPlayer1(prev => !prev);
@@ -357,7 +373,7 @@ function App() {
 
 			}, 1500);
 		}
-	}, [ choiceOne, choiceTwo, setPlayer1, setPlayer2]);
+	}, [choiceOne, choiceTwo]);
 
 	/**
 		 * to check if all cards are matched
@@ -373,36 +389,57 @@ function App() {
 	/**
 	 * to check if game is end
 	 */
-	useEffect(()=>{ 
-		
-		
+	useEffect(() => {
 
-		const f =  ()=>{
-			console.log({player1Points, player2Points});
-			setTimeout (async() => {
+
+
+		const f = () => {
+			console.log({ player1Points, player2Points });
+			setTimeout(async () => {
+
+				// confetti
+				jsConfetti.addConfetti({ 
+					emojis: ["🌈", "⚡️", "💥", "✨", "💫", "🧟‍♂️", "🧟‍♀️"],
+					
+				})
+					.catch(e => { console.error("Error: ", e); });
 
 				const winner = player1Points > player2Points ?
-					"player1" 
+					"player1"
 					: player2Points > player1Points ?
 						"player2"
-						: "empate";
+						: "empate"; 
 
-				await Swal.fire({
-					title:"Juego terminado",
-					text:`player1 points: ${player1Points}, player2 points: ${player2Points}
+				if (winner === "empate") {
+					await Swal.fire({
+						title: "Empate",
+						text: `player1 points: ${player1Points}, player2 points: ${player2Points}
 						gana: ${winner}`,
-					icon:"success"
-				});
+						icon: "success"
+					});
+				} else {
+					await Swal.fire({
+						title: `${winner} 🏆`,
+						text: "Win",
+						icon: "success"
+					});
+				}
+
+
 			}, 1000);
-			
+
 		};
 
-		if(gameEnd){
-			console.log("first");
+		// solo se ejecuta si gameEnd
+		if (gameEnd) {
+
+			
+			
+			// execute function
 			f();
 		}
 
-	},[gameEnd, player1Points, player2Points]);
+	}, [gameEnd, player1Points, player2Points]);
 
 
 
@@ -410,7 +447,15 @@ function App() {
 		<div className='app'>
 			<h1>Pokemon Match</h1>
 
-			<h3>Turns: {turns}</h3>
+			<Marcador
+				player1={player1}
+				player2={player2}
+				player1Points={player1Points}
+				player2Points={player2Points}
+				turns={turns}
+				twoPlayers={twoPlayers}
+			/>
+
 			<button onClick={newGame}>New Game</button>
 
 			{
@@ -420,33 +465,34 @@ function App() {
 
 					// if don't have pokemons , don't show nothing
 					: pokemons &&
-						<div className={`card-container ${width}`}>
-							{
-								pokemons.map((pokemon, index) => {
-									return (
-										<CardPokemon
-											key={index}
-											pokemon={pokemon}
-											handleChoice={handleChoice}
-											flipped={
-												pokemon === choiceOne ||
-												pokemon === choiceTwo ||
-												pokemon.matched
-											}
-											disabled={disabled}
-										/>
-									);
-								})
-							}
-						</div>
+					<div className={`card-container ${width}`}>
+						{
+							pokemons.map((pokemon, index) => {
+								return (
+									<CardPokemon
+										key={index}
+										pokemon={pokemon}
+										handleChoice={handleChoice}
+										flipped={
+											pokemon === choiceOne ||
+											pokemon === choiceTwo ||
+											pokemon.matched
+										}
+										disabled={disabled}
+									/>
+								);
+							})
+						}
+					</div>
 			}
 
-			<Settings 
-				setPkmCount={setPkmCount} 
-				pkmCount={pkmCount} 
+			<Settings
+				setPkmCount={setPkmCount}
+				pkmCount={pkmCount}
 				setCardsManually={setCardsManually}
 				manually={manually}
 				setManually={setManually}
+				setTwoPlayers={setTwoPlayers}
 			/>
 
 

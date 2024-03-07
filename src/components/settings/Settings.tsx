@@ -11,12 +11,13 @@ type Props = {
 	pkmCount: number,
 	setCardsManually: (pokemonNames: PokemonName[]) => void,
 	manually: boolean,
-	setManually: (manually: boolean) => void
+	setManually: (manually: boolean) => void,
+	setTwoPlayers: (twoPlayers: boolean)=> void
 }
 
 const dataPokemonNames: PokemonNames = pokemonsNames;
 
-export default function Settings({ setPkmCount, pkmCount, setCardsManually, manually, setManually }: Props) {
+export default function Settings({ setTwoPlayers, setPkmCount, pkmCount, setCardsManually, manually, setManually }: Props) {
 
 
 	const [searchValue, setSearchValue] = useState("");
@@ -43,6 +44,16 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 			} else {
 				setManually(false);
 			}
+			break;
+
+		case "select-players":
+			if(target.id === "2-players"){
+				setTwoPlayers(true);
+			}else{
+				setTwoPlayers(false);
+			}
+			console.log("hola");
+
 			break;
 
 		case "searchPkm":
@@ -228,6 +239,29 @@ export default function Settings({ setPkmCount, pkmCount, setCardsManually, manu
 					<div className='input-element'>
 						<label htmlFor="pkmsCount">Select number of pairs:</label>
 						<input className="pkmCount" type="number" name="pkmsCount" min="3" max="15" onChange={handleChange} value={pkmCount} />
+					</div>
+
+					<div className="players">
+						<h3>Select players</h3>
+						<label htmlFor="1-player" className="mr-1">
+							<input 
+								type="radio" 
+								name="select-players"
+								id="1-player"
+								defaultChecked
+								onChange={handleChange}
+							/>
+							1 Player
+						</label>
+						<label htmlFor="2-players">
+							<input 
+								type="radio" 
+								name="select-players"
+								id="2-players"
+								onChange={handleChange}
+							/>
+							2 Players
+						</label>
 					</div>
 
 					<div className="select-cards">
