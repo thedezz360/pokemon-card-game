@@ -53,7 +53,7 @@ function App() {
 
 
 	/**
-	 * fetch, to get randomly pokemon from pokeapi
+	 * fetch, to get randomly Pokémon from pokeapi
 	 * @param pkmsCount number of pokemons thats we want
 	 * @returns Array with the number of Pokemon that have been specified
 	 */
@@ -85,7 +85,7 @@ function App() {
 	};
 
 	/**
-	 * fetch, to get manually pokemon from pokeapi
+	 * fetch, to get manually Pokémon from pokeapi
 	 * @param cards array of cards that we will find
 	 * @returns Array with the number of Pokemon that have been specified
 	 */
@@ -118,8 +118,8 @@ function App() {
 	};
 
 	/**
-	 * function to duplicate the pokemons and sort it randomly
-	 * @param data Array with pokemons
+	 * function to duplicate the Pokémon and sort it randomly
+	 * @param data Array with Pokémon
 	 */
 	// shuffle cards
 	const shuffleCards = (data: Pokemon[]) => {
@@ -195,8 +195,8 @@ function App() {
 	};
 
 	/**
-	 * Get the numbers of pokemons and set pkmsCount
-	 * call fetchData to get pokemons
+	 * Get the numbers of Pokémon and set pkmsCount
+	 * call fetchData to get Pokémon
 	 * call shuffleCard to duplicate and sort randomly 
 	 * @param e event of click
 	 */
@@ -280,7 +280,7 @@ function App() {
 
 	/**
 		 * get the cards when click over there 
-		 * @param card data pokemon
+		 * @param card data Pokémon
 		 */
 	const handleChoice = (card: PokemonMin) => {
 		if (choiceOne) {
@@ -312,7 +312,7 @@ function App() {
 	
 
 	/**
-		* compare 2 selected pokemons
+		* compare 2 selected Pokémon
 		*/
 	useEffect(() => {
 		
